@@ -1,0 +1,115 @@
+
+import numpy as np
+from matplotlib import pyplot as plt    #añadimos las librerias
+from mpl_toolkits.mplot3d import Axes3D
+from scipy.integrate import solve_ivp, odeint
+import math 
+#Definimos el sistema
+
+r1=1
+r2=0.6
+r3=4.5
+k1=1
+k2=1
+k3=1
+a12=1
+a13=2.5
+a21=1.5
+a31=0.2
+d3=0.5
+pi=3.1416
+xd1 =0.1
+xd3 =0.6
+a1=1
+a2=1
+k=1
+trinche=1
+u=0;
+#xd1=np.sin(pi*2*5)
+#xd0=0.4*np.sin(pi*2*5)
+def  ModeloCancer(x,t):
+#Definimos los parametros
+     # f1=(x[1]/k1)*(1-(x[1]/k1))-(a12*k2/r1)*(x[1]*x[2]/(k1*k2))-(a13*k3/r1)*(x[1]*x[3]/(k1*k3))
+     #f2=(r2/r1)*x[2]/k2*(1-x[2]/k2)-(a21*k1/r1)*x[1]*x[2]/(k1*k2)
+     # f3=(r3/r1)*x[1]*x[3]/(k1*k3*(x[1]/k1+k3)-(a31*k1/r1)*x[1]*x[3]/(k1*k3))-(d3/r1)*x[3]/k3
+ #     u=(1/(x[1]-xd1))*(-(x[0]-xd0)*(x[0]*(1-x[0])-(a12*k2/r1)*(x[0]*x[1]/(k1*k2))-(a13*k3/r1)*(x[0]*x[2]/(k1*k3)))-(x[1]-xd1)*((r3/r1)*x[0]*x[2]/(x[0]+k3)-(a31*k1/r1)*x[0]*x[2]/(k1*k3)-(d3/r1)*x[2])-k1*(x[0]-xd0)-k2*(x[1]-xd1))
+      
+      
+      f1=(x[0]/k1)*(1-(x[0]/k1))-(a12*k2/r1)*(x[0]*x[1]/(k1*k2))-(a13*k3/r1)*(x[0]*x[2]/(k1*k3))
+      f2=(r2/r1)*x[1]/k2*(1-x[1]/k2)-(a21*k1/r1)*x[0]*x[1]/(k1*k2)
+      f3=(r3/r1)*x[0]*x[2]/(k1*k3*(x[0]/k1+k3)-(a31*k1/r1)*x[0]*x[2]/(k1*k3))-(d3/r1)*x[2]/k3 +u
+      xdot=np.array([f1,f2,f3]) 
+      return xdot
+
+#RK4
+def RungeKutta4(f,x0,t0,tf,dt):
+	t=np.arange(t0,tf,dt)
+	nt=t.size
+	nx=x0.size
+	x=np.zeros((nx,nt))
+	x[:,0]=x0
+
+	for k in range(nt-1):
+		k1=dt*f(t[k],x[:,k])
+		k2=dt*f(t[k]+dt/2,x[:,k]+k1/2)
+		k3=dt*f(t[k]+dt/2,x[:,k]+k2/2)
+		k4=dt*f(t[k]+dt,x[:,k]+k3)
+		dx=(k1+2*k2+2*k3+k4)/6
+		x[:,k+1]=x[:,k]+dx
+
+	return x,t
+
+f=lambda t,x : ModeloCancer(x,t)
+#Condiciones iniciales
+x0=np.array([0.1,0.1,0.1])
+#Ploteo y punto de paso
+t0=0
+tf=200
+dt=0.001
+
+x,t=RungeKutta4(f,x0,t0,tf,dt)
+#t1=np.linspace(0,30,8000)
+#sol=[odeint(ModeloCancer,init,t) for init in x0];
+#sol=[odeint(dynamical_model_cancer,init,t1) for init in x0]
+#from scipy.integrate import odeint
+#sol = odeint(ModeloCancer, y0, t,args=params)
+
+#Ploteamos los resultados
+#plt.subplot(1,2,1)
+plt.figure()
+plt.plot(t,x[0,:],"r",label='celulas cancerosas r=1.2')
+plt.plot(t,x[1,:],"b",label='celulas depredadoras r=0.5')
+plt.plot(t,x[2,:],"g",label='celulas depredadoras en reposo r=1')
+plt.legend()
+plt.xlabel('Tiempo(dias)')
+plt.ylabel('Numero de celulas / mm^2')
+plt.title('Comportamiento caotico del Cancer')
+plt.minorticks_on()
+plt.grid(b=True, which='minor', color='#999999', linestyle='-', alpha=0.2)
+#plt.subplot(1,2,2)
+
+
+#plt.plot(f[0,:],x[2,:])
+#plt.xlabel('numerode Celulas Cancerosas')
+#plt.ylabel('numero de Celulas depredadoras en reposo')
+#plt.minorticks_on()
+#plt.grid(b=True, which='minor', color='#999999', linestyle='-', alpha=0.2)
+#plt.subplot(1,3,1)
+
+#plt.plot(t,x[0,:],"r",label='celulas cancerosas a13=4')
+#plt.plot(t,x[1,:],"b",label='celulas depredadoras a21=2')
+#plt.plot(t,x[2,:],"g",label='celulas depredadoras en reposo a31=0.8')
+#plt.legend()
+#plt.xlabel('Tiempo')
+#plt.ylabel('Numero de celulas')
+#plt.title('Comportamiento caotico del Cancer')
+#plt.minorticks_on()
+#plt.grid(b=True, which='minor', color='#999999', linestyle='-', alpha=0.2)
+#plt.subplot(1,3,3)
+#plt.plot(x[1,:],x[2,:])
+#plt.xlabel('numerode Celulas depredadoras')
+#plt.ylabel('numero de Celulas depredadoras en reposo')
+#plt.minorticks_on()
+#plt.grid(b=True, which='minor', color='#999999', linestyle='-', alpha=0.2)
+plt.show()
+
